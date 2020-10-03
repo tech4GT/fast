@@ -27,7 +27,7 @@ typings/
 # dotenv environment variables file
 .env
 
-# Ignore distribution directory 
+# Ignore distribution directory
 dist/
 
 # Ignore build www directories
@@ -36,10 +36,6 @@ storybook-static
 
 #Ignore Mac .DS_Store
 .DS_Store
-
-#Ignore VSCode in Root
-/.vscode/
-/.vs/
 
 # tmp directories
 .tmp/
