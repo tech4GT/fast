@@ -1,5 +1,5 @@
 import { assert, expect } from "chai";
-import { customElement, DOM, html } from "@microsoft/fast-element";
+import { customElement, DOM, ElementStyles, html } from "@microsoft/fast-element";
 import { fixture } from "../fixture";
 import { createPopoverTemplate, Popover } from "./index";
 import { PopoverPosition } from "./popover";
@@ -20,7 +20,9 @@ async function defaultSetup() {
             </fast-popover>
         </div>
     `);
-    return { element, connect, disconnect, document };
+
+    const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+    return { element, connect, disconnect, document, popover };
 }
 
 async function trapFocusSetup() {
@@ -53,8 +55,7 @@ async function autofocusSetup() {
 
 describe("Popover", () => {
     it("should have trap-focus by default", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        const { element, connect, disconnect, popover } = await defaultSetup();
 
         popover.visible = true;
 
@@ -66,8 +67,7 @@ describe("Popover", () => {
         await disconnect();
     });
     it("should include a role of `dialog` in the shadowRoot once visible", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        const { element, connect, disconnect, popover } = await defaultSetup();
 
         popover.visible = true;
 
@@ -82,8 +82,7 @@ describe("Popover", () => {
     });
 
     it("should not render the popover by default", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        const { element, connect, disconnect, popover } = await defaultSetup();
 
         await connect();
         await DOM.nextUpdate();
@@ -95,8 +94,7 @@ describe("Popover", () => {
     });
 
     it("should render the popover when visible is true", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        const { element, connect, disconnect, popover } = await defaultSetup();
 
         popover.visible = true;
 
@@ -112,10 +110,7 @@ describe("Popover", () => {
     });
 
     it("should not render the popover when visible is false", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
-
-        popover.visible = false;
+        const { element, connect, disconnect, popover } = await defaultSetup();
 
         await connect();
         await DOM.nextUpdate();
@@ -126,310 +121,344 @@ describe("Popover", () => {
         await disconnect();
     });
 
-    it("should set positioning mode to dynamic by default", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+    describe("Position", () => {
+        it("should set positioning mode to dynamic by default", async () => {
+            const { element, connect, disconnect, popover } = await defaultSetup();
 
-        await connect();
+            await connect();
 
-        expect(popover.verticalPositioningMode).to.equal("dynamic");
-        expect(popover.horizontalPositioningMode).to.equal("dynamic");
+            expect(popover.verticalPositioningMode).to.equal("dynamic");
+            expect(popover.horizontalPositioningMode).to.equal("dynamic");
 
-        await disconnect();
-    });
+            await disconnect();
+        });
 
-    it("should not set a default position by default", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        it("should not set a default position by default", async () => {
+            const { element, connect, disconnect, popover } = await defaultSetup();
 
-        await connect();
+            await connect();
 
-        expect(popover.verticalDefaultPosition).to.equal(undefined);
-        expect(popover.horizontalDefaultPosition).to.equal(undefined);
+            expect(popover.verticalDefaultPosition).to.equal(undefined);
+            expect(popover.horizontalDefaultPosition).to.equal(undefined);
 
-        await disconnect();
-    });
+            await disconnect();
+        });
 
-    it("should set horizontal scaling to match anchor and vertical scaling to match content by default", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        it("should set horizontal scaling to match anchor and vertical scaling to match content by default", async () => {
+            const { element, connect, disconnect, popover } = await defaultSetup();
 
-        await connect();
+            await connect();
 
-        expect(popover.verticalScaling).to.equal("content");
-        expect(popover.horizontalScaling).to.equal("anchor");
+            expect(popover.verticalScaling).to.equal("content");
+            expect(popover.horizontalScaling).to.equal("anchor");
 
-        await disconnect();
-    });
+            await disconnect();
+        });
 
-    // top position settings
+        // top position settings
 
-    it("should set vertical positioning mode to locked and horizontal to dynamic when position is set to top", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        it("should set vertical positioning mode to locked and horizontal to dynamic when position is set to top", async () => {
+            const { element, connect, disconnect, popover } = await defaultSetup();
 
-        popover.position = PopoverPosition.top;
+            popover.position = PopoverPosition.top;
 
-        await connect();
+            await connect();
 
-        expect(popover.verticalPositioningMode).to.equal("locktodefault");
-        expect(popover.horizontalPositioningMode).to.equal("dynamic");
+            expect(popover.verticalPositioningMode).to.equal("locktodefault");
+            expect(popover.horizontalPositioningMode).to.equal("dynamic");
 
-        await disconnect();
-    });
+            await disconnect();
+        });
 
-    it("should set default vertical position to top when position is set to top", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        it("should set default vertical position to top when position is set to top", async () => {
+            const { element, connect, disconnect, popover } = await defaultSetup();
 
-        popover.position = PopoverPosition.top;
+            popover.position = PopoverPosition.top;
 
-        await connect();
+            await connect();
 
-        expect(popover.verticalDefaultPosition).to.equal("top");
-        expect(popover.horizontalDefaultPosition).to.equal(undefined);
+            expect(popover.verticalDefaultPosition).to.equal("top");
+            expect(popover.horizontalDefaultPosition).to.equal(undefined);
 
-        await disconnect();
-    });
+            await disconnect();
+        });
 
-    it("should set horizontal scaling to match anchor and vertical scaling to match content when position is set to top", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        it("should set horizontal scaling to match anchor and vertical scaling to match content when position is set to top", async () => {
+            const { element, connect, disconnect, popover } = await defaultSetup();
 
-        popover.position = PopoverPosition.top;
+            popover.position = PopoverPosition.top;
 
-        await connect();
+            await connect();
 
-        expect(popover.verticalScaling).to.equal("content");
-        expect(popover.horizontalScaling).to.equal("anchor");
+            expect(popover.verticalScaling).to.equal("content");
+            expect(popover.horizontalScaling).to.equal("anchor");
 
-        await disconnect();
-    });
+            await disconnect();
+        });
 
-    // bottom position settings
+        // bottom position settings
 
-    it("should set vertical positioning mode to locked and horizontal to dynamic when position is set to bottom", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        it("should set vertical positioning mode to locked and horizontal to dynamic when position is set to bottom", async () => {
+            const { element, connect, disconnect, popover } = await defaultSetup();
 
-        popover.position = PopoverPosition.bottom;
+            popover.position = PopoverPosition.bottom;
 
-        await connect();
+            await connect();
 
-        expect(popover.verticalPositioningMode).to.equal("locktodefault");
-        expect(popover.horizontalPositioningMode).to.equal("dynamic");
+            expect(popover.verticalPositioningMode).to.equal("locktodefault");
+            expect(popover.horizontalPositioningMode).to.equal("dynamic");
 
-        await disconnect();
-    });
+            await disconnect();
+        });
 
-    it("should set default vertical position to top when position is set to top", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        it("should set default vertical position to top when position is set to top", async () => {
+            const { element, connect, disconnect, popover } = await defaultSetup();
 
-        popover.position = PopoverPosition.bottom;
+            popover.position = PopoverPosition.bottom;
 
-        await connect();
+            await connect();
 
-        expect(popover.verticalDefaultPosition).to.equal("bottom");
-        expect(popover.horizontalDefaultPosition).to.equal(undefined);
+            expect(popover.verticalDefaultPosition).to.equal("bottom");
+            expect(popover.horizontalDefaultPosition).to.equal(undefined);
 
-        await disconnect();
-    });
+            await disconnect();
+        });
 
-    it("should set horizontal scaling to match anchor and vertical scaling to match content when position is set to bottom", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        it("should set horizontal scaling to match anchor and vertical scaling to match content when position is set to bottom", async () => {
+            const { element, connect, disconnect, popover } = await defaultSetup();
 
-        popover.position = PopoverPosition.bottom;
+            popover.position = PopoverPosition.bottom;
 
-        await connect();
+            await connect();
 
-        expect(popover.verticalScaling).to.equal("content");
-        expect(popover.horizontalScaling).to.equal("anchor");
+            expect(popover.verticalScaling).to.equal("content");
+            expect(popover.horizontalScaling).to.equal("anchor");
 
-        await disconnect();
-    });
+            await disconnect();
+        });
 
-    // left position settings
+        // left position settings
 
-    it("should set horizontal positioning mode to locked and vertical to dynamic when position is set to left", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        it("should set horizontal positioning mode to locked and vertical to dynamic when position is set to left", async () => {
+            const { element, connect, disconnect, popover } = await defaultSetup();
 
-        popover.position = PopoverPosition.left;
+            popover.position = PopoverPosition.left;
 
-        await connect();
+            await connect();
 
-        expect(popover.verticalPositioningMode).to.equal("dynamic");
-        expect(popover.horizontalPositioningMode).to.equal("locktodefault");
+            expect(popover.verticalPositioningMode).to.equal("dynamic");
+            expect(popover.horizontalPositioningMode).to.equal("locktodefault");
 
-        await disconnect();
-    });
+            await disconnect();
+        });
 
-    it("should set default horizontal position to left when position is set to left", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        it("should set default horizontal position to left when position is set to left", async () => {
+            const { element, connect, disconnect, popover } = await defaultSetup();
 
-        popover.position = PopoverPosition.left;
+            popover.position = PopoverPosition.left;
 
-        await connect();
+            await connect();
 
-        expect(popover.verticalDefaultPosition).to.equal(undefined);
-        expect(popover.horizontalDefaultPosition).to.equal("left");
+            expect(popover.verticalDefaultPosition).to.equal(undefined);
+            expect(popover.horizontalDefaultPosition).to.equal("left");
 
-        await disconnect();
-    });
+            await disconnect();
+        });
 
-    it("should set vertical scaling to match anchor and horizontal scaling to match content when position is set to bottom", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        it("should set vertical scaling to match anchor and horizontal scaling to match content when position is set to bottom", async () => {
+            const { element, connect, disconnect, popover } = await defaultSetup();
 
-        popover.position = PopoverPosition.left;
+            popover.position = PopoverPosition.left;
 
-        await connect();
+            await connect();
 
-        expect(popover.verticalScaling).to.equal("anchor");
-        expect(popover.horizontalScaling).to.equal("content");
+            expect(popover.verticalScaling).to.equal("anchor");
+            expect(popover.horizontalScaling).to.equal("content");
 
-        await disconnect();
-    });
+            await disconnect();
+        });
 
-    // right position settings
+        // right position settings
 
-    it("should set horizontal positioning mode to locked and vertical to dynamic when position is set to right", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        it("should set horizontal positioning mode to locked and vertical to dynamic when position is set to right", async () => {
+            const { element, connect, disconnect, popover } = await defaultSetup();
 
-        popover.position = PopoverPosition.right;
+            popover.position = PopoverPosition.right;
 
-        await connect();
+            await connect();
 
-        expect(popover.verticalPositioningMode).to.equal("dynamic");
-        expect(popover.horizontalPositioningMode).to.equal("locktodefault");
+            expect(popover.verticalPositioningMode).to.equal("dynamic");
+            expect(popover.horizontalPositioningMode).to.equal("locktodefault");
 
-        await disconnect();
-    });
+            await disconnect();
+        });
 
-    it("should set default horizontal position to right when position is set to right", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        it("should set default horizontal position to right when position is set to right", async () => {
+            const { element, connect, disconnect, popover } = await defaultSetup();
 
-        popover.position = PopoverPosition.right;
+            popover.position = PopoverPosition.right;
 
-        await connect();
+            await connect();
 
-        expect(popover.verticalDefaultPosition).to.equal(undefined);
-        expect(popover.horizontalDefaultPosition).to.equal("right");
+            expect(popover.verticalDefaultPosition).to.equal(undefined);
+            expect(popover.horizontalDefaultPosition).to.equal("right");
 
-        await disconnect();
-    });
+            await disconnect();
+        });
 
-    it("should set vertical scaling to match anchor and horizontal scaling to match content when position is set to rig", async () => {
-        const { element, connect, disconnect } = await defaultSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+        it("should set vertical scaling to match anchor and horizontal scaling to match content when position is set to rig", async () => {
+            const { element, connect, disconnect, popover } = await defaultSetup();
 
-        popover.position = PopoverPosition.right;
+            popover.position = PopoverPosition.right;
 
-        await connect();
+            await connect();
 
-        expect(popover.verticalScaling).to.equal("anchor");
-        expect(popover.horizontalScaling).to.equal("content");
+            expect(popover.verticalScaling).to.equal("anchor");
+            expect(popover.horizontalScaling).to.equal("content");
 
-        await disconnect();
+            await disconnect();
+        });
     });
 
     // focus testing
+    describe("Focus", () => {
+        it("should set focus to first button in popover", async () => {
+            const { element, connect, disconnect, document } = await trapFocusSetup();
 
-    it("should set focus to first button in popover", async () => {
-        const { element, connect, disconnect, document } = await trapFocusSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+            await connect();
+            await DOM.nextUpdate();
+            await DOM.nextUpdate();
 
-        await connect();
-        await DOM.nextUpdate();
-        await DOM.nextUpdate();
+            expect(document.activeElement?.id).to.equal("buttonOne");
 
-        expect(document.activeElement?.id).to.equal("buttonOne");
+            await disconnect();
+        });
 
-        await disconnect();
-    });
+        it("should set focus to autofocus button in popover", async () => {
+            const { element, connect, disconnect, document } = await autofocusSetup();
 
-    it("should set focus to autofocus button in popover", async () => {
-        const { element, connect, disconnect, document } = await autofocusSetup();
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+            await connect();
+            await DOM.nextUpdate();
+            await DOM.nextUpdate();
 
-        await connect();
-        await DOM.nextUpdate();
-        await DOM.nextUpdate();
+            expect(document.activeElement?.id).to.equal("shouldAutofocus");
 
-        expect(document.activeElement?.id).to.equal("shouldAutofocus");
-
-        await disconnect();
+            await disconnect();
+        });
     });
 
     // event testing
+    describe("Event", () => {
+        it("should fire a 'dismiss' event when escape is invoked on the document", async () => {
+            const {
+                element,
+                connect,
+                disconnect,
+                document,
+                popover,
+            } = await defaultSetup();
 
-    it("should fire a 'dismiss' event when escape is invoked on the document", async () => {
-        const { element, connect, disconnect, document } = await defaultSetup();
+            popover.visible = true;
 
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
+            const event = new KeyboardEvent("keydown", {
+                key: "Escape",
+                keyCode: KeyCodes.escape,
+            } as KeyboardEventInit);
 
-        popover.visible = true;
+            await connect();
+            await DOM.nextUpdate();
 
-        const event = new KeyboardEvent("keydown", {
-            key: "Escape",
-            keyCode: KeyCodes.escape,
-        } as KeyboardEventInit);
+            const wasDismissed = await new Promise(resolve => {
+                element.addEventListener("dismiss", e => resolve(true));
 
-        await connect();
-        await DOM.nextUpdate();
+                document.dispatchEvent(event);
 
-        const wasDismissed = await new Promise(resolve => {
-            element.addEventListener("dismiss", e => resolve(true));
+                // Resolve false on the next update in case the event hasn't happened
+                DOM.queueUpdate(() => resolve(false));
+            });
 
-            document.dispatchEvent(event);
+            expect(wasDismissed).to.equal(true);
+            expect(popover.popoverVisible).to.equal(false);
+            expect(popover.visible).to.equal(false);
 
-            // Resolve false on the next update in case the event hasn't happened
-            DOM.queueUpdate(() => resolve(false));
+            await disconnect();
         });
 
-        expect(wasDismissed).to.equal(true);
-        expect(popover.popoverVisible).to.equal(false);
+        it("should fire a 'dismiss' event when visible is changed to false", async () => {
+            const {
+                element,
+                connect,
+                disconnect,
+                document,
+                popover,
+            } = await defaultSetup();
 
-        await disconnect();
+            let wasDismissed: boolean = false;
+            element.addEventListener("dismiss", e => (wasDismissed = true));
+
+            popover.visible = true;
+
+            await connect();
+            popover.visible = false;
+
+            expect(wasDismissed).to.equal(true);
+            expect(popover.popoverVisible).to.equal(false);
+            expect(popover.visible).to.equal(false);
+
+            await disconnect();
+        });
+
+        it("should focus the target element when the dismiss event is triggered by default", async () => {
+            const {
+                element,
+                connect,
+                disconnect,
+                document,
+                popover,
+            } = await defaultSetup();
+
+            const target: HTMLButtonElement = element.querySelector(
+                "#target"
+            ) as HTMLButtonElement;
+
+            popover.visible = true;
+
+            const event = new KeyboardEvent("keydown", {
+                key: "Escape",
+                keyCode: KeyCodes.escape,
+            } as KeyboardEventInit);
+
+            await connect();
+
+            target.focus();
+
+            expect(document.activeElement).to.equal(target);
+
+            const wasDismissed = await new Promise(resolve => {
+                element.addEventListener("dismiss", e => resolve(true));
+                document.dispatchEvent(event);
+                DOM.queueUpdate(() => resolve(false));
+            });
+
+            expect(wasDismissed).to.equal(true);
+            expect(popover.visible).to.equal(false);
+            expect(document.activeElement).to.equal(target);
+
+            await disconnect();
+        });
     });
+    describe("Disconnect Cycle", () => {
+        it("should hide popover on disconnect", async () => {
+            const { element, connect, disconnect, popover } = await defaultSetup();
 
-    it("should focus the target element when the dismiss event is triggered by default", async () => {
-        const { element, connect, disconnect, document } = await defaultSetup();
+            popover.visible = true;
 
-        const popover: FASTPopover = element.querySelector("fast-popover") as FASTPopover;
-        const target: HTMLButtonElement = element.querySelector(
-            "#target"
-        ) as HTMLButtonElement;
+            await connect();
 
-        popover.visible = true;
+            await disconnect();
 
-        const event = new KeyboardEvent("keydown", {
-            key: "Escape",
-            keyCode: KeyCodes.escape,
-        } as KeyboardEventInit);
-
-        await connect();
-
-        target.focus();
-
-        expect(document.activeElement).to.equal(target);
-
-        const wasDismissed = await new Promise(resolve => {
-            element.addEventListener("dismiss", e => resolve(true));
-            document.dispatchEvent(event);
-            DOM.queueUpdate(() => resolve(false));
+            expect(popover.popoverVisible).to.be.false;
         });
-
-        expect(wasDismissed).to.equal(true);
-        expect(popover.visible).to.equal(false);
-        expect(document.activeElement).to.equal(target);
-
-        await disconnect();
     });
 
     // TODO: ADD focus-target-on-dismiss disabled test

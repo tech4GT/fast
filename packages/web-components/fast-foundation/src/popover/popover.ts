@@ -30,7 +30,7 @@ export class Popover extends FASTElement {
     public visible: boolean;
     private visibleChanged(): void {
         if ((this as FASTElement).$fastController.isConnected) {
-            if (!this.visible && this.isDelayTriggered) {
+            if (!this.visible && this.delayTriggered) {
                 // prevents a double click of target from creating an erroneous state of visible = false, but the popover still shows on the page when delay is used. This occurs when the delay is longer than the double click period.
                 this.visible = true;
                 return;
@@ -193,7 +193,7 @@ export class Popover extends FASTElement {
      * @internal
      */
     @observable
-    public isDelayTriggered: boolean = false;
+    public delayTriggered: boolean = false;
 
     /**
      * Track current direction to pass to the anchored region, updated when popover is shown
@@ -300,7 +300,6 @@ export class Popover extends FASTElement {
             !this.contains(e.target as Node) &&
             e.target !== this.targetElement
         ) {
-            // this.hidePopover();
             this.visible = false;
             this.popoverVisible = false;
         }
@@ -411,7 +410,6 @@ export class Popover extends FASTElement {
             switch (e.keyCode) {
                 case keyCodeEscape:
                     this.visible = false;
-                    this.$emit("dismiss");
                     break;
                 case keyCodeTab:
                     if (this.trapFocus) {
@@ -474,9 +472,9 @@ export class Popover extends FASTElement {
         }
 
         this.currentDirection = getDirection(this);
-        if (!this.isDelayTriggered) {
+        if (!this.delayTriggered) {
             if (this.delay > 1) {
-                this.isDelayTriggered = true;
+                this.delayTriggered = true;
                 this.delayTimer = window.setTimeout((): void => {
                     this.showPopover();
                 }, this.delay);
@@ -490,7 +488,7 @@ export class Popover extends FASTElement {
         document.addEventListener("keydown", this.handleDocumentKeydown);
         document.addEventListener("click", this.handleDocumentClick);
         this.popoverVisible = true;
-        this.isDelayTriggered = false;
+        this.delayTriggered = false;
         DOM.queueUpdate(this.setRegionProps);
     };
 
@@ -517,6 +515,7 @@ export class Popover extends FASTElement {
             this.refocusOnTarget();
         }
         this.popoverVisible = false;
+        this.$emit("dismiss");
         this.clearDelayTimer();
     };
 
