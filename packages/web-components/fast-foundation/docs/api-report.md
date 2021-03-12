@@ -1513,6 +1513,8 @@ export class Picker extends FASTElement {
     selectedOptions: string[];
     // (undocumented)
     selection: string;
+    // @internal (undocumented)
+    showOptions: boolean;
     // (undocumented)
     updatePosition: () => void;
 }
