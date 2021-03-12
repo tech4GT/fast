@@ -150,8 +150,8 @@ export class ARIAGlobalStatesAndProperties {
     ariaRoledescription: string;
 }
 
-// @public (undocumented)
-export type AutoUpdateMode = "none" | "constant";
+// @public
+export type AutoUpdateMode = "none" | "constant" | "auto";
 
 // @beta
 export type AxisPositioningMode = "uncontrolled" | "locktodefault" | "dynamic";
@@ -1448,6 +1448,8 @@ export type ParentLocator = (owner: any) => Container | null;
 // @public
 export class Picker extends FASTElement {
     autoUpdateInterval: number;
+    // (undocumented)
+    autoUpdateMode: AutoUpdateMode;
     // @internal (undocumented)
     connectedCallback(): void;
     // (undocumented)
