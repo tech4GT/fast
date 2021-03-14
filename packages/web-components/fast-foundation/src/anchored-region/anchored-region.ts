@@ -59,7 +59,7 @@ export type VerticalPosition = "top" | "bottom" | "unset";
  * auto - The component enters constant mode for 1000 ms after the last "triggering event", otherwise no timer based checking.
  *        "triggering events" are: component initial layout, window resize, bubbled scroll events, and any call to to update()
  */
-export type AutoUpdateMode = "none" | "constant" | "auto";
+export type AutoUpdateMode = "none" | "triggered" | "constant" | "auto";
 
 /**
  * @internal
@@ -333,15 +333,15 @@ export class AnchoredRegion extends FASTElement {
             (this as FASTElement).$fastController.isConnected &&
             this.initialLayoutComplete
         ) {
-            if (prevMode === "auto") {
+            if (prevMode === "auto" || prevMode === "triggered") {
                 this.stopAutoUpdateEventListeners();
             }
 
-            if (newMode === "auto") {
+            if (newMode === "auto" || newMode === "triggered") {
                 this.startAutoUpdateEventListeners();
             }
 
-            if (this.autoUpdateMode !== null) {
+            if (this.autoUpdateMode === "constant") {
                 this.startUpdateTimer();
             } else {
                 this.clearUpdateTimer();
@@ -468,7 +468,7 @@ export class AnchoredRegion extends FASTElement {
     connectedCallback() {
         super.connectedCallback();
         document.addEventListener(eventVisibilityChange, this.handleVisibilityChange);
-        if (this.autoUpdateMode === "auto") {
+        if (this.autoUpdateMode === "auto" || this.autoUpdateMode === "triggered") {
             this.startAutoUpdateEventListeners();
         }
         this.initialize();
@@ -479,7 +479,7 @@ export class AnchoredRegion extends FASTElement {
      */
     public disconnectedCallback(): void {
         super.disconnectedCallback();
-        if (this.autoUpdateMode === "auto") {
+        if (this.autoUpdateMode === "auto" || this.autoUpdateMode === "triggered") {
             this.stopAutoUpdateEventListeners();
         }
         document.removeEventListener(eventVisibilityChange, this.handleVisibilityChange);
@@ -498,7 +498,7 @@ export class AnchoredRegion extends FASTElement {
      * update position
      */
     public update = (): void => {
-        if (this.autoUpdateMode === "none") {
+        if (this.autoUpdateMode === "none" || this.autoUpdateMode === "triggered") {
             this.doUpdate();
             return;
         }
@@ -513,8 +513,8 @@ export class AnchoredRegion extends FASTElement {
         horizontalOffsetDelta: number,
         verticalOffsetDelta: number
     ): void => {
-        // don't allow offset manipulation while autoupdating active
-        if (this.autoUpdateMode !== "none") {
+        // don't allow offset manipulation  timed autoupdating active
+        if (this.autoUpdateMode === "auto" || this.autoUpdateMode === "triggered") {
             return;
         }
 
@@ -1319,7 +1319,8 @@ export class AnchoredRegion extends FASTElement {
             !document.hidden &&
             this.initialLayoutComplete &&
             this.autoUpdateInterval > 0 &&
-            this.autoUpdateMode !== "none"
+            this.autoUpdateMode !== "none" &&
+            this.autoUpdateMode !== "triggered"
         ) {
             this.updateTimer = window.setInterval((): void => {
                 this.updateTimerTick();
@@ -1337,6 +1338,7 @@ export class AnchoredRegion extends FASTElement {
         if (
             document.hidden ||
             this.autoUpdateMode === "none" ||
+            this.autoUpdateMode === "triggered" ||
             (this.autoUpdateMode === "auto" && this.autoUpdateTimeStampExpired())
         ) {
             this.clearUpdateTimer();
@@ -1371,7 +1373,11 @@ export class AnchoredRegion extends FASTElement {
      * Restarts autoupdating when a hidden document is shown
      */
     private handleVisibilityChange = (): void => {
-        if (!document.hidden && this.autoUpdateMode !== "none") {
+        if (
+            !document.hidden &&
+            this.autoUpdateMode !== "none" &&
+            this.autoUpdateMode !== "triggered"
+        ) {
             this.startUpdateTimer();
         }
     };
@@ -1392,8 +1398,8 @@ export class AnchoredRegion extends FASTElement {
      * starts event listeners that can trigger auto updating
      */
     private startAutoUpdateEventListeners = (): void => {
-        window.addEventListener(eventResize, this.startUpdateTimer);
-        window.addEventListener(eventScroll, this.startUpdateTimer, true);
+        window.addEventListener(eventResize, this.update);
+        window.addEventListener(eventScroll, this.update, true);
         if (this.resizeDetector !== null && this.viewportElement !== null) {
             this.resizeDetector.observe(this.viewportElement);
         }
@@ -1403,8 +1409,8 @@ export class AnchoredRegion extends FASTElement {
      * stops event listeners that can trigger auto updating
      */
     private stopAutoUpdateEventListeners = (): void => {
-        window.removeEventListener(eventResize, this.startUpdateTimer);
-        window.removeEventListener(eventScroll, this.startUpdateTimer);
+        window.removeEventListener(eventResize, this.update);
+        window.removeEventListener(eventScroll, this.update);
         if (this.resizeDetector !== null && this.viewportElement !== null) {
             this.resizeDetector.unobserve(this.viewportElement);
         }

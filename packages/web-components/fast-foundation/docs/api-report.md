@@ -151,7 +151,7 @@ export class ARIAGlobalStatesAndProperties {
 }
 
 // @public
-export type AutoUpdateMode = "none" | "constant" | "auto";
+export type AutoUpdateMode = "none" | "triggered" | "constant" | "auto";
 
 // @beta
 export type AxisPositioningMode = "uncontrolled" | "locktodefault" | "dynamic";
