@@ -357,7 +357,7 @@ export enum ComboboxAutocomplete {
 }
 
 // @public
-export const ComboboxTemplate: import("@microsoft/fast-element").ViewTemplate<Combobox, any>;
+export const ComboboxTemplate: ViewTemplate<Combobox>;
 
 // @alpha
 export interface ComponentPresentation {
@@ -1379,7 +1379,7 @@ export enum MenuItemRole {
 }
 
 // @public @deprecated
-export const MenuItemTemplate: ViewTemplate;
+export const MenuItemTemplate: ViewTemplate<MenuItem>;
 
 // @public
 export const MenuTemplate: ViewTemplate<Menu>;
@@ -1551,7 +1551,7 @@ export class PickerMenu extends FASTElement {
 export type PickerMenuPosition = "top" | "bottom" | "dynamic";
 
 // @public
-export const ProgressRingTemplate: import("@microsoft/fast-element").ViewTemplate<BaseProgress, any>;
+export const ProgressRingTemplate: ViewTemplate<BaseProgress>;
 
 // @public
 export const ProgressTemplate: ViewTemplate<BaseProgress>;
