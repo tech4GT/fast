@@ -1478,7 +1478,7 @@ export class Picker extends FASTElement {
     // (undocumented)
     protected handleSelectionChange(): void;
     // (undocumented)
-    protected handleTextInput: (e: InputEvent) => boolean;
+    protected handleTextInput(e: InputEvent): void;
     // @internal
     inputElement: HTMLInputElement;
     // (undocumented)
